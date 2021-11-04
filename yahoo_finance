@@ -1,0 +1,57 @@
+import json
+import requests
+import datetime
+import csv
+
+apikey='iDxt8sYRwY2NcOWXKhgGa31vLLY9pfm37ZM2i5vz'
+
+url = "https://yfapi.net/v6/finance/quote"
+user = str(input("Enter a ticker symbol: "))
+user.strip()
+querystring = {"symbols": user}
+
+#querylist = querystring["symbols"].split(", ")
+
+headers = {
+  'x-api-key': apikey
+   }
+
+def response_to_request (querystring): 
+    # noinspection PyBroadException
+    try:
+      response = requests.request("GET", url, headers=headers, params=querystring)
+      response.raise_for_status()  
+      stock_json = response.json()
+      
+      #Getting the symbol
+      symbol = stock_json['quoteResponse']['result'][0]["symbol"]
+
+      #Conversion of Unix Timestandard to Readable Time
+      time = datetime.datetime.fromtimestamp(int(stock_json['quoteResponse']['result'][0]["regularMarketTime"])).strftime('%Y-%m-%d %H:%M:%S')
+
+      #Getting price
+      regularmarketprice = stock_json['quoteResponse']['result'][0]["regularMarketPrice"]
+
+      #Creating the row
+      row = str(symbol) + ", " + str(time) + ", " + str(regularmarketprice)
+    
+      print("Price: " + str(regularmarketprice))
+      print("Time: " + str(time))
+      print("Name: " + str(stock_json['quoteResponse']['result'][0]["shortName"]))
+
+      #write to a csv
+      with open('Barrett_J_Yahoo_Finance', 'a', newline='') as file:
+        writer = csv.writer(file)
+        writer.writerow(row)
+
+      #return row
+    except:
+        print("Ticker invalid! Try again.")
+        user = str(input("Enter a ticker symbol: "))
+        querystring = {"symbols": user}
+        response_to_request(querystring)
+
+response_to_request(querystring)
+
+
+
