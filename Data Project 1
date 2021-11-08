@@ -5,6 +5,12 @@ from sqlalchemy import create_engine
 
 
 def finance (querystring):
+    '''
+    finance provides the primary tool for this ETL pipline. 
+    When running, querystring will be comprised of a string provided by the user. 
+    finance will extract data from yahoo finance api, and transform the data into an sql database. 
+    The pipeline operates one ticker at a time, with "quit" as the sentinel value. 
+    '''
     response = requests.request("GET", url, headers=headers, params=querystring)
     response.raise_for_status()  
     stock_json = response.json()
