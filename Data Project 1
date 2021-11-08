@@ -1,0 +1,73 @@
+import requests
+import pandas as pd
+#importing sql library
+from sqlalchemy import create_engine
+
+
+def finance (querystring):
+    response = requests.request("GET", url, headers=headers, params=querystring)
+    response.raise_for_status()  
+    stock_json = response.json()
+    #Display of original data set
+    print(stock_json)
+
+    #Brief summary of original data file fetched:
+    print("There are " + str(len(stock_json['quoteResponse']['result'][0].keys())) + " data records found for " + str(stock_json['quoteResponse']['result'][0]['displayName']) + ".\n")
+
+    ##Conversion of Json into a Pandas dataframe
+    original_df = pd.DataFrame([stock_json['quoteResponse']['result'][0]])
+    print(original_df)
+    print("When converted into a dataframe, there are " + str(len(original_df.columns)) + " columns.\n")
+
+
+    #Full conversion from Pandas dataframe into sql table
+    # create a reference
+    # for sql library
+    engine = create_engine('sqlite://', echo = False)
+            
+    # attach the data frame to the sql
+    # with a name of the table
+    # as "Employee_Data"
+    original_df.to_sql('Barrett_J_sql', con = engine, if_exists='append')
+            
+    # show the complete data from Barrett_J_sql table
+          
+    #Modification of source data by reduction of columns. 
+    sql_db = pd.read_sql_query('Select displayName, postMarketPrice from Barrett_J_sql', con = engine)
+    print("Writing to an SQL Database, the following table can be produced:\n")
+    print(sql_db)
+
+    user = str(input("Congrats; Enter another ticker symbol, or enter 'quit' to quit: ")).upper()     
+
+
+user = str((input("Enter a ticker symbol, enter quit to quit: "))).upper()
+# promt for input
+#Fetch of Data from Yahoo finance with a personalized key.
+apikey='iDxt8sYRwY2NcOWXKhgGa31vLLY9pfm37ZM2i5vz'
+
+url = "https://yfapi.net/v6/finance/quote"
+        
+user = user.split(", ")
+# Intake of ticker symbol
+querystring = {"symbols": user}
+
+headers = {
+    'x-api-key': apikey
+    }
+    
+while user !='QUIT':
+    try:
+      finance(querystring)
+      user = str(input("Congrats; Enter another ticker symbol, or enter 'quit' to quit: ")).upper()     
+    except :
+      user = str(input("Enter a valid ticker: ")).upper()
+      querystring = {"symbols": user}
+      finance(querystring)
+      
+
+
+
+
+
+
+  
